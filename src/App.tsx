@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import BudgetForm from "./components/BufgetForm";
 import { useBudget } from "./hooks/useBudget";
 import BudgetTacker from "./components/BudgetTacker";
@@ -9,6 +9,10 @@ function App() {
 
     const isValidBudget = useMemo(() => state.budget > 0, [state.budget]);
 
+    useEffect(() => {
+        localStorage.setItem("budget", state.budget.toString());
+        localStorage.setItem("expenses", JSON.stringify(state.expenses));
+    }, [state]);
     return (
         <>
             <header className="bg-blue-600 py-8 ">

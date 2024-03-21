@@ -1,5 +1,5 @@
 import { categories } from "../data/categorias";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useState, useEffect } from "react";
 import DatePicker from "react-date-picker";
 import "react-calendar/dist/Calendar.css";
 import "react-date-picker/dist/DatePicker.css";
@@ -15,7 +15,7 @@ const ExpenseForm = () => {
         date: new Date(),
     });
 
-    const { dispatch } = useBudget();
+    const { dispatch, state } = useBudget();
     const [error, setError] = useState("");
 
     const handleChange = (event: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
@@ -37,7 +37,12 @@ const ExpenseForm = () => {
         }
 
         setError("");
-        dispatch({ type: "add-expense", payload: { expense } });
+
+        if (state.expenseveId) {
+            dispatch({ type: "update-expense", payload: { expense: { ...expense, id: state.expenseveId } } });
+        } else {
+            dispatch({ type: "add-expense", payload: { expense } });
+        }
         setExpense({
             expenseName: "",
             amount: 0,
@@ -45,11 +50,17 @@ const ExpenseForm = () => {
             date: new Date(),
         });
     };
+
+    useEffect(() => {
+        if (state.expenseveId) {
+            setExpense(state.expenses.filter((currenteIds) => currenteIds.id === state.expenseveId)[0]);
+        }
+    }, [state.expenseveId]);
+
     return (
         <form className="space-y-4 " onSubmit={handleSubmit}>
             <legend className="text-2xl font-black uppercase text-center border-b-2 border-blue-500 py-2">
-                {" "}
-                Nuevo Gasto
+                {state.expenseveId ? "Editar Gasto" : "Nuevo Gasto"}
             </legend>
             {error && <ErrorMessage>{error}</ErrorMessage>}
             <div className="flex flex-col gap-2">
@@ -97,7 +108,7 @@ const ExpenseForm = () => {
                     <option value="">-- Seleccione --</option>
 
                     {categories.map((category) => (
-                        <option key={category.id} value={category.name}>
+                        <option key={category.id} value={category.id}>
                             {category.name}
                         </option>
                     ))}
@@ -117,7 +128,7 @@ const ExpenseForm = () => {
             </div>
             <input
                 type="submit"
-                value="Añadir Gasto"
+                value={state.expenseveId ? "Guardar Cambios" : "Anadir Gasto"}
                 className="w-full bg-blue-500 p-2 text-white uppercase font-bold hover:bg-blue-400 cursor-pointer"
             />
         </form>

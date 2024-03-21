@@ -17,6 +17,7 @@ const BudgetForm = () => {
     const isValid = useMemo(() => {
         return isNaN(budget) || budget <= 0;
     }, [budget]);
+
     return (
         <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="flex flex-col space-y-5">
