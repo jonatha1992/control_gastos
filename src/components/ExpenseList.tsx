@@ -5,7 +5,11 @@ import ExpenseDetail from "./ExpenseDetail";
 const ExpenseList = () => {
     const { state } = useBudget();
 
-    const isEmpty = useMemo(() => state.expenses.length === 0, [state.expenses]);
+    const filtroExpenses = state.currentCategory
+        ? state.expenses.filter((expense) => expense.category === state.currentCategory)
+        : state.expenses;
+
+    const isEmpty = useMemo(() => filtroExpenses.length === 0, [filtroExpenses]);
     return (
         <div className="mt-10">
             {isEmpty ? (
@@ -15,7 +19,7 @@ const ExpenseList = () => {
             )}
 
             <ul className="space-y-4">
-                {state.expenses.map((expense) => (
+                {filtroExpenses.map((expense) => (
                     <li key={expense.id}>
                         <ExpenseDetail expense={expense} />
                     </li>

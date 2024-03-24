@@ -15,8 +15,9 @@ const ExpenseForm = () => {
         date: new Date(),
     });
 
-    const { dispatch, state } = useBudget();
+    const { dispatch, state, remaining } = useBudget();
     const [error, setError] = useState("");
+    const [previusAmount, setPreviusAmount] = useState(0);
 
     const handleChange = (event: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = event.target;
@@ -31,6 +32,10 @@ const ExpenseForm = () => {
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
+        if (expense.amount - previusAmount > remaining) {
+            setError("Ese gasto supera el presupuesto hay fondos suficientes");
+            return;
+        }
         if (Object.values(expense).includes("")) {
             setError("Todos los campos son obligatorios");
             return;
@@ -38,8 +43,8 @@ const ExpenseForm = () => {
 
         setError("");
 
-        if (state.expenseveId) {
-            dispatch({ type: "update-expense", payload: { expense: { ...expense, id: state.expenseveId } } });
+        if (state.editingId) {
+            dispatch({ type: "update-expense", payload: { expense: { ...expense, id: state.editingId } } });
         } else {
             dispatch({ type: "add-expense", payload: { expense } });
         }
@@ -49,18 +54,20 @@ const ExpenseForm = () => {
             category: "",
             date: new Date(),
         });
+        setPreviusAmount(0);
     };
 
     useEffect(() => {
-        if (state.expenseveId) {
-            setExpense(state.expenses.filter((currenteIds) => currenteIds.id === state.expenseveId)[0]);
+        if (state.editingId) {
+            setExpense(state.expenses.filter((currenteIds) => currenteIds.id === state.editingId)[0]);
+            setPreviusAmount(expense.amount);
         }
-    }, [state.expenseveId]);
+    }, [state.editingId]);
 
     return (
         <form className="space-y-4 " onSubmit={handleSubmit}>
             <legend className="text-2xl font-black uppercase text-center border-b-2 border-blue-500 py-2">
-                {state.expenseveId ? "Editar Gasto" : "Nuevo Gasto"}
+                {state.editingId ? "Editar Gasto" : "Nuevo Gasto"}
             </legend>
             {error && <ErrorMessage>{error}</ErrorMessage>}
             <div className="flex flex-col gap-2">
@@ -128,7 +135,7 @@ const ExpenseForm = () => {
             </div>
             <input
                 type="submit"
-                value={state.expenseveId ? "Guardar Cambios" : "Anadir Gasto"}
+                value={state.editingId ? "Guardar Cambios" : "Anadir Gasto"}
                 className="w-full bg-blue-500 p-2 text-white uppercase font-bold hover:bg-blue-400 cursor-pointer"
             />
         </form>
